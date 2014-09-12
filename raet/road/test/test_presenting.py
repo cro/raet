@@ -14,6 +14,7 @@ else:
 import os
 import time
 import tempfile
+import time
 import shutil
 from random import sample
 from string import digits, ascii_uppercase, ascii_lowercase
@@ -395,6 +396,7 @@ class BasicTestCase(unittest.TestCase):
         '''
         Test allow transaction for other to main unjoined on both
         '''
+        time.sleep(1)
         console.terse("{0}\n".format(self.testAllowFromOtherUnjoinedBoth.__doc__))
 
         mainData = self.createRoadData(name='main', base=self.base, auto=True)
