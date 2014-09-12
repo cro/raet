@@ -15,6 +15,8 @@ import time
 import tempfile
 import shutil
 from collections import deque
+from random import sample
+from string import digits, ascii_uppercase, ascii_lowercase
 
 from ioflo.base.odicting import odict
 from ioflo.base.aiding import Timer, StoreTimer
@@ -33,6 +35,17 @@ def tearDownModule():
     pass
 
 
+def tempbasedir(prefix='', suffix='', dir='', lane='', keep=''):
+    chars = ascii_lowercase + ascii_uppercase + digits
+    tempDirpath = '/tmp/{0}{1}{2}'.format(prefix, ''.join(sample(chars, 4)), suffix)
+    baseDirpath = '{0}/{1}/{2}'.format(tempDirpath, lane, keep)
+
+    if not sys.platform == 'win32':
+        os.makedirs(baseDirpath)
+
+    return (tempDirpath, baseDirpath)
+
+
 
 class BasicTestCase(unittest.TestCase):
     """"""
@@ -41,8 +54,11 @@ class BasicTestCase(unittest.TestCase):
         self.store = storing.Store(stamp=0.0)
         self.timer = StoreTimer(store=self.store, duration=1.0)
 
-        self.tempDirPath = tempfile.mkdtemp(prefix="raet",  suffix="base", dir='/tmp')
-        self.baseDirpath = os.path.join(self.tempDirPath, 'lane', 'keep')
+        self.tempDirpath, self.baseDirpath = tempbasedir(prefix='raet',
+                                                         suffix='base', 
+                                                         dir='/tmp', 
+                                                         lane='lane', 
+                                                         keep='keep')
 
         # main stack
         self.main = stacking.LaneStack(name='main',
@@ -59,6 +75,9 @@ class BasicTestCase(unittest.TestCase):
     def tearDown(self):
         self.main.server.close()
         self.other.server.close()
+
+        if not sys.platform == 'win32':
+            shutil.rmtree(self.tempDirpath)
 
     def service(self, duration=1.0, real=True):
         '''
@@ -544,7 +563,8 @@ class BasicTestCase(unittest.TestCase):
                                        base=self.baseDirpath,
                                        lanename='apple')
         main = self.createLaneStack(data=mainData, main=True)
-        self.assertTrue(main.local.ha.endswith('/lane/keep/main/apple.main.uxd'))
+        endswithstring = 'apple.main.uxd'
+        self.assertTrue(main.local.ha.endswith(endswithstring))
         self.assertTrue(main.local.main)
 
         otherData = self.createLaneData(name='other',
@@ -552,7 +572,8 @@ class BasicTestCase(unittest.TestCase):
                                         base=self.baseDirpath,
                                         lanename='apple')
         other = self.createLaneStack(data=otherData)
-        self.assertTrue(other.local.ha.endswith('/lane/keep/other/apple.other.uxd'))
+        endswithstring = 'apple.other.uxd'
+        self.assertTrue(other.local.ha.endswith(endswithstring))
 
         main.addRemote(yarding.RemoteYard(stack=main, ha=other.local.ha))
         self.assertTrue('other' in main.nameRemotes)

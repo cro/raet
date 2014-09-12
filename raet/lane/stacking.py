@@ -87,8 +87,9 @@ class LaneStack(stacking.Stack):
         if not self.local:
             return None
 
-        server = aiding.SocketUxdNb(ha=self.local.ha,
+        server = aiding.SocketLocalNb(ha=self.local.ha,
                             bufsize=raeting.UXD_MAX_PACKET_SIZE * self.bufcnt)
+
         return server
 
     def _handleOneRx(self):
