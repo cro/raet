@@ -15,6 +15,9 @@ import os
 import time
 import tempfile
 import shutil
+from random import sample
+from string import digits, ascii_uppercase, ascii_lowercase
+
 
 from ioflo.base.odicting import odict
 from ioflo.base.aiding import Timer, StoreTimer
@@ -25,6 +28,19 @@ console = getConsole()
 from raet import raeting, nacling
 from raet.road import estating, keeping, stacking
 
+
+def tempbasedir(prefix='', suffix='', dir='', lane='', keep=''):
+    chars = ascii_lowercase + ascii_uppercase + digits
+    return tempfile.mkdtemp(prefix=prefix, suffix=suffix)
+    # tempDirpath = os.path.join('/tmp', prefix, ''.join(sample(chars, 4)), suffix)
+    # if lane and keep:
+    #     baseDirpath = os.path.join(tempDirpath, lane, keep)
+    # else:
+    #     baseDirpath = ''
+    #
+    #os.makedirs(tempDirpath)
+    #
+    #return tempDirpath
 
 def setUpModule():
     console.reinit(verbosity=console.Wordage.concise)
@@ -39,7 +55,7 @@ class BasicTestCase(unittest.TestCase):
         self.store = storing.Store(stamp=0.0)
         self.timer = StoreTimer(store=self.store, duration=1.0)
 
-        self.base = tempfile.mkdtemp(prefix="raet",  suffix="base")
+        self.base = tempbasedir(prefix="raet",  suffix="base")
 
     def tearDown(self):
         if os.path.exists(self.base):

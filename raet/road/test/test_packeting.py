@@ -15,6 +15,8 @@ import os
 import time
 import tempfile
 import shutil
+from random import sample
+from string import digits, ascii_uppercase, ascii_lowercase
 
 from ioflo.base.odicting import odict
 from ioflo.base.aiding import Timer, StoreTimer
@@ -32,6 +34,8 @@ def setUpModule():
 def tearDownModule():
     pass
 
+def tempbasedir(prefix='', suffix='', dir='', lane='', keep=''):
+    return tempfile.mkdtemp(prefix=prefix, suffix=suffix)
 
 class BasicTestCase(unittest.TestCase):
     '''

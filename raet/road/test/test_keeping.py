@@ -28,18 +28,9 @@ console = getConsole()
 
 from raet import raeting, nacling
 from raet.road import estating, keeping, stacking
+
 def tempbasedir(prefix='', suffix='', dir='', lane='', keep=''):
-    chars = ascii_lowercase + ascii_uppercase + digits
-    tempDirpath = '/tmp/{0}{1}{2}'.format(prefix, ''.join(sample(chars, 4)), suffix)
-    if lane and keep:
-        baseDirpath = '{0}/{1}/{2}'.format(tempDirpath, lane, keep)
-    else:
-        baseDirpath = ''
-
-    if not sys.platform == 'win32':
-        os.makedirs(baseDirpath)
-
-    return tempDirpath
+    return tempfile.mkdtemp(prefix=prefix, suffix=suffix)
 
 def setUpModule():
     console.reinit(verbosity=console.Wordage.concise)
@@ -54,8 +45,8 @@ class BasicTestCase(unittest.TestCase):
         self.store = storing.Store(stamp=0.0)
         self.timer = StoreTimer(store=self.store, duration=1.0)
 
-        self.base = tempfile.mkdtemp(prefix="raet",  suffix="base")
-        # self.base = tempbasedir(prefix="raet", suffix='base', dir='/tmp')
+        # self.base = tempfile.mkdtemp(prefix="raet",  suffix="base")
+        self.base = tempbasedir(prefix="raet", suffix='base')
 
     def tearDown(self):
 
@@ -632,7 +623,7 @@ class BasicTestCase(unittest.TestCase):
                                      ha=None)
         #default ha is ("", raeting.RAET_PORT)
 
-        self.assertTrue(main.keep.dirpath.endswith(os.path,join('road', 'keep', 'main')))
+        self.assertTrue(main.keep.dirpath.endswith(os.path.join('road', 'keep', 'main')))
         self.assertEqual(main.local.ha, ("0.0.0.0", raeting.RAET_PORT))
 
         data = self.createRoadData(name='other', base=self.base)
