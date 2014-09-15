@@ -8,6 +8,7 @@ stacking.py raet protocol stacking classes
 # Import python libs
 import socket
 import os
+import sys
 import errno
 
 from collections import deque,  Mapping
@@ -87,8 +88,12 @@ class LaneStack(stacking.Stack):
         if not self.local:
             return None
 
-        server = aiding.SocketLocalNb(ha=self.local.ha,
-                            bufsize=raeting.UXD_MAX_PACKET_SIZE * self.bufcnt)
+        if not sys.platform == 'win32':
+            server = aiding.SocketUxdNb(ha=self.local.ha,
+                                bufsize=raeting.UXD_MAX_PACKET_SIZE * self.bufcnt)
+        else:
+            server = aiding.WinmailslotNb(ha=self.local.ha,
+                                bufsize=raeting.UXD_MAX_PACKET_SIZE * self.bufcnt)
 
         return server
 
