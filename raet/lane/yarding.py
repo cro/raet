@@ -89,6 +89,10 @@ class Yard(lotting.Lot):
         if not ha:
             if not dirpath:
                 dirpath = YARD_UXD_DIR
+
+            # not ha above means we want a local socket (uxd or mailslot)
+	    # If this is windows we don't need to check if we can make directories
+	    # because the namespace under \\.\mailslot\ is flat.
             if not sys.platform == 'win32':
                 self.dirpath = os.path.abspath(os.path.expanduser(dirpath))
                 if not os.path.exists(dirpath):
