@@ -476,7 +476,6 @@ class BasicTestCase(unittest.TestCase):
         others = []
         others.append(odict(what="This is a message to the lord. Let me be", extra="Go away."))
 
-        import pdb; pdb.set_trace()
         self.message(mains=[], others=others)
 
         self.assertEqual(len(self.main.remotes), 1)
