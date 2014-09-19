@@ -23,7 +23,7 @@ console = getConsole()
 
 if sys.platform == 'win32':
     YARD_UXD_DIR = os.path.join('\\\\mailslot\\.','var', 'cache', 'raet')
-    ALT_YARD_UXD_DIR = YARD_UXD_DIR
+    ALT_YARD_UXD_DIR = os.path.join('\\\\mailslot\\.\\', '.raet', 'uxd')
 else:
     YARD_UXD_DIR = os.path.join('/var', 'cache', 'raet')
     ALT_YARD_UXD_DIR = os.path.join('~', '.raet', 'uxd')
