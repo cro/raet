@@ -8,6 +8,7 @@ stacking.py raet protocol stacking classes
 # Import python libs
 import socket
 import os
+import sys
 import errno
 
 from collections import deque,  Mapping
@@ -35,6 +36,7 @@ console = getConsole()
 class LaneStack(stacking.Stack):
     '''
     RAET protocol UXD (unix domain) socket stack object
+    or RAET protocol Winmailslot stack object
     '''
     Count = 0
     Uid =  0
@@ -78,8 +80,15 @@ class LaneStack(stacking.Stack):
         '''
         Create local listening server for stack
         '''
-        server = aiding.SocketUxdNb(ha=self.ha,
-                            bufsize=raeting.UXD_MAX_PACKET_SIZE * self.bufcnt)
+        if not self.local:
+            return None
+
+        if sys.platform == 'win32':
+            server = aiding.WinmailslotNb(ha=self.local.ha,
+                                bufsize=raeting.UXD_MAX_PACKET_SIZE * self.bufcnt)
+        else:
+            server = aiding.SocketUxdNb(ha=self.local.ha,
+                                bufsize=raeting.UXD_MAX_PACKET_SIZE * self.bufcnt)
         return server
 
     def addRemote(self, remote):
@@ -110,7 +119,7 @@ class LaneStack(stacking.Stack):
 
         try:
             page.head.parse()
-        except PageError as ex:
+        except raeting.PageError as ex:
             console.terse(str(ex) + '\n')
             self.incStat('invalid_page_header')
 

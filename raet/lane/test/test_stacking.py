@@ -14,6 +14,9 @@ import os
 import time
 import tempfile
 import shutil
+import random
+import msgpack
+
 from collections import deque
 
 from ioflo.base.odicting import odict
@@ -26,23 +29,44 @@ console = getConsole()
 from raet import raeting
 from raet.lane import yarding, stacking
 
+if 'TEMP' in os.environ:
+    TEMPDIR = os.environ['TEMP']
+elif 'TMP' in os.environ:
+    TEMPDIR = os.environ['TMP']
+else:
+    if sys.platform == 'win32':
+        TEMPDIR = 'c:\temp'
+        try:
+            os.mkdir(TEMPDIR)
+        except Exception:
+            pass
+    else:
+        TEMPDIR = '/tmp'
+
+
 def setUpModule():
-    console.reinit(verbosity=console.Wordage.concise)
+    console.reinit(verbosity=console.Wordage.verbose)
+
 
 def tearDownModule():
     pass
-
 
 
 class BasicTestCase(unittest.TestCase):
     """"""
 
     def setUp(self):
+
+        random.seed()
+        chset = 'abcdefghijklmnopqrstuvwxyz'
         self.store = storing.Store(stamp=0.0)
         self.timer = StoreTimer(store=self.store, duration=1.0)
 
-        self.tempDirPath = tempfile.mkdtemp(prefix="raet",  suffix="base", dir='/tmp')
-        self.baseDirpath = os.path.join(self.tempDirPath, 'lane', 'keep')
+        if sys.platform == 'win32':
+            self.tempDirpath = '\\\\.\\mailslot\\raet\\{0}\\base'.format(''.join(random.sample(chset, 4)))
+        else:
+            self.tempDirpath = tempfile.mkdtemp(prefix="raet",  suffix="base", dir=TEMPDIR)
+        self.baseDirpath = os.path.join(self.tempDirpath, 'lane', 'keep')
 
         # main stack
         self.main = stacking.LaneStack(name='main',
@@ -59,6 +83,9 @@ class BasicTestCase(unittest.TestCase):
     def tearDown(self):
         self.main.server.close()
         self.other.server.close()
+
+        if not sys.platform == 'win32':
+            shutil.rmtree(self.tempDirpath)
 
     def service(self, duration=1.0, real=True):
         '''
@@ -449,6 +476,7 @@ class BasicTestCase(unittest.TestCase):
         others = []
         others.append(odict(what="This is a message to the lord. Let me be", extra="Go away."))
 
+        import pdb; pdb.set_trace()
         self.message(mains=[], others=others)
 
         self.assertEqual(len(self.main.remotes), 1)
@@ -543,15 +571,17 @@ class BasicTestCase(unittest.TestCase):
                                        base=self.baseDirpath,
                                        lanename='apple')
         main = self.createLaneStack(data=mainData, main=True)
-        self.assertTrue(main.ha.endswith('/lane/keep/main/apple.main.uxd'))
-        self.assertTrue(main.main)
+        endswithstring = 'apple.main.uxd'
+        self.assertTrue(main.local.ha.endswith(endswithstring))
+        self.assertTrue(main.local.main)
 
         otherData = self.createLaneData(name='other',
                                         uid=1,
                                         base=self.baseDirpath,
                                         lanename='apple')
         other = self.createLaneStack(data=otherData)
-        self.assertTrue(other.ha.endswith('/lane/keep/other/apple.other.uxd'))
+        endswithstring = 'apple.other.uxd'
+        self.assertTrue(other.local.ha.endswith(endswithstring))
 
         main.addRemote(yarding.RemoteYard(stack=main, ha=other.ha))
         self.assertTrue('other' in main.nameRemotes)

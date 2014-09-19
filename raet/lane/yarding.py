@@ -7,6 +7,7 @@ yarding.py raet protocol estate classes
 # Import python libs
 import socket
 import os
+import sys
 import errno
 
 # Import ioflo libs
@@ -20,9 +21,12 @@ from .. import lotting
 from ioflo.base.consoling import getConsole
 console = getConsole()
 
-YARD_UXD_DIR = os.path.join('/var', 'cache', 'raet')
-ALT_YARD_UXD_DIR = os.path.join('~', '.raet', 'uxd')
-
+if sys.platform == 'win32':
+    YARD_UXD_DIR = os.path.join('\\\\mailslot\\.','var', 'cache', 'raet')
+    ALT_YARD_UXD_DIR = YARD_UXD_DIR
+else:
+    YARD_UXD_DIR = os.path.join('/var', 'cache', 'raet')
+    ALT_YARD_UXD_DIR = os.path.join('~', '.raet', 'uxd')
 
 class Yard(lotting.Lot):
     '''
@@ -85,31 +89,32 @@ class Yard(lotting.Lot):
         if not ha:
             if not dirpath:
                 dirpath = YARD_UXD_DIR
-            self.dirpath = os.path.abspath(os.path.expanduser(dirpath))
-            if not os.path.exists(dirpath):
-                try:
-                    os.makedirs(dirpath)
-                except OSError as ex:
-                    dirpath = os.path.abspath(os.path.expanduser(ALT_YARD_UXD_DIR))
-                    if not os.path.exists(dirpath):
-                        try:
-                            os.makedirs(dirpath)
-                        except OSError as ex:
-                            if ex.errno == errno.EEXIST:
-                                pass # race condition
-                            else:
-                                raise
-            else:
-                if not os.access(dirpath, os.R_OK | os.W_OK):
-                    dirpath = os.path.abspath(os.path.expanduser(ALT_YARD_UXD_DIR))
-                    if not os.path.exists(dirpath):
-                        try:
-                            os.makedirs(dirpath)
-                        except OSError as ex:
-                            if ex.errno == errno.EEXIST:
-                                pass # race condition
-                            else:
-                                raise
+            if not sys.platform == 'win32':
+                self.dirpath = os.path.abspath(os.path.expanduser(dirpath))
+                if not os.path.exists(dirpath):
+                    try:
+                        os.makedirs(dirpath)
+                    except OSError as ex:
+                        dirpath = os.path.abspath(os.path.expanduser(ALT_YARD_UXD_DIR))
+                        if not os.path.exists(dirpath):
+                            try:
+                                os.makedirs(dirpath)
+                            except OSError as ex:
+                                if ex.errno == errno.EEXIST:
+                                    pass # race condition
+                                else:
+                                    raise
+                else:
+                    if not os.access(dirpath, os.R_OK | os.W_OK):
+                        dirpath = os.path.abspath(os.path.expanduser(ALT_YARD_UXD_DIR))
+                        if not os.path.exists(dirpath):
+                            try:
+                                os.makedirs(dirpath)
+                            except OSError as ex:
+                                if ex.errno == errno.EEXIST:
+                                    pass # race condition
+                                else:
+                                    raise
 
             ha = os.path.join(dirpath, "{0}.{1}.uxd".format(self.lanename, self.name))
 
