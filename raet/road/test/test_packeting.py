@@ -26,6 +26,20 @@ console = getConsole()
 from raet import raeting, nacling
 from raet.road import keeping, packeting, estating, stacking, transacting
 
+if 'TEMP' in os.environ:
+    TEMPDIR = os.environ['TEMP']
+elif 'TMP' in os.environ:
+    TEMPDIR = os.environ['TMP']
+else:
+    if sys.platform == 'win32':
+        TEMPDIR = 'c:\temp'
+        try:
+            os.mkdir(TEMPDIR)
+        except Exception:
+            pass
+    else:
+        TEMPDIR = '/tmp'
+
 def setUpModule():
     console.reinit(verbosity=console.Wordage.concise)
 
@@ -388,7 +402,7 @@ class StackTestCase(unittest.TestCase):
         self.store = storing.Store(stamp=0.0)
         self.timer = StoreTimer(store=self.store, duration=1.0)
 
-        self.dirpathBase=tempfile.mkdtemp(prefix="raet",  suffix="base", dir='/tmp')
+        self.dirpathBase=tempfile.mkdtemp(prefix="raet",  suffix="base", dir=TEMPDIR)
         stacking.RoadStack.Bk = raeting.bodyKinds.json
 
         #main stack

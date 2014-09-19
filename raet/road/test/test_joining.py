@@ -25,6 +25,20 @@ console = getConsole()
 from raet import raeting, nacling
 from raet.road import estating, keeping, stacking
 
+if 'TEMP' in os.environ:
+    TEMPDIR = os.environ['TEMP']
+elif 'TMP' in os.environ:
+    TEMPDIR = os.environ['TMP']
+else:
+    if sys.platform == 'win32':
+        TEMPDIR = 'c:\temp'
+        try:
+            os.mkdir(TEMPDIR)
+        except Exception:
+            pass
+    else:
+        TEMPDIR = '/tmp'
+
 
 def setUpModule():
     console.reinit(verbosity=console.Wordage.concise)
@@ -39,7 +53,7 @@ class BasicTestCase(unittest.TestCase):
         self.store = storing.Store(stamp=0.0)
         self.timer = StoreTimer(store=self.store, duration=1.0)
 
-        self.base = tempfile.mkdtemp(prefix="raet",  suffix="base", dir='/tmp')
+        self.base = tempfile.mkdtemp(prefix="raet",  suffix="base", dir=TEMPDIR)
 
     def tearDown(self):
         if os.path.exists(self.base):
