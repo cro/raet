@@ -5,6 +5,7 @@ estating.py raet protocol estate classes
 # pylint: skip-file
 # pylint: disable=W0611
 
+import sys
 import socket
 import uuid
 from collections import deque
@@ -66,7 +67,11 @@ class Estate(lotting.Lot):
             iha = (host, port)
         self.iha = iha # internal host address duple (host, port)
         self.natted = natted # is estate behind nat router
-        self.fqdn = fqdn or socket.getfqdn(self.ha[0]) if self.ha else ''
+        # socket.getfqdn behaves differently on Windows
+        if sys.platform == 'win32' and self.ha[0] == '127.0.0.1':
+            self.fqdn = fqdn or '1.0.0.127.in-addr.arpa' if self.ha else ''
+        else:
+            self.fqdn = fqdn or socket.getfqdn(self.ha[0]) if self.ha else ''
         self.dyned = dyned
         self.role = role if role is not None else self.name
         self.transactions = odict() # estate transactions keyed by transaction index
